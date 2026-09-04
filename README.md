@@ -26,7 +26,7 @@ _Nenhum prompt cadastrado ainda._
 
 Pipelines de CI/CD, containers, orquestração, infraestrutura como código, observabilidade, SRE e segurança operacional.
 
-_Nenhum prompt cadastrado ainda._
+- [diagnosticar-incidente-kubernetes-k8sgpt](./devops/diagnosticar-incidente-kubernetes-k8sgpt/) — Investiga a causa-raiz de um incidente Kubernetes usando apenas K8sGPT (somente leitura) e entrega um RCA em três tópicos — causa-raiz, resumo da solução e procedimento técnico.
 
 <!--
 Ao adicionar um prompt, substituir "Nenhum prompt cadastrado ainda" pela lista:
