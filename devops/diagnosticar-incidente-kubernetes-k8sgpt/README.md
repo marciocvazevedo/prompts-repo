@@ -1,7 +1,7 @@
 ---
 nome: Diagnosticar Causa-Raiz de Incidente Kubernetes via K8sGPT
 descricao: Investiga a causa-raiz de um incidente Kubernetes usando apenas K8sGPT (somente leitura) e entrega um RCA em três tópicos — causa-raiz, resumo da solução e procedimento técnico.
-versao: 1.0.0
+versao: 1.1.0
 tags: [kubernetes, k8sgpt, rca, sre, devops]
 inputs:
   - nome: DESCRICAO_DO_PROBLEMA

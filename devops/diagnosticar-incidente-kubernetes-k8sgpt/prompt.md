@@ -1,7 +1,7 @@
 ---
 nome: Diagnosticar Causa-Raiz de Incidente Kubernetes via K8sGPT
 descricao: Investiga a causa-raiz de um incidente Kubernetes usando apenas K8sGPT (somente leitura) e entrega um RCA em três tópicos — causa-raiz, resumo da solução e procedimento técnico.
-versao: 1.0.0
+versao: 1.1.0
 tags: [kubernetes, k8sgpt, rca, sre, devops]
 inputs:
   - nome: DESCRICAO_DO_PROBLEMA
@@ -86,10 +86,12 @@ Extraia da descrição: sintoma principal, escopo afetado, janela de tempo, sina
 
 **Etapa 2 — Coletar com K8sGPT (executar)**
 
+Use `--anonymize` em **toda** chamada de `k8sgpt analyze`, sem exceção — inclusive nos exemplos abaixo:
+
 ```bash
 k8sgpt analyze --explain --output json --anonymize
-k8sgpt analyze --explain --namespace <ns> --output json
-k8sgpt analyze --explain --filter Pod,Deployment,ReplicaSet,StatefulSet,Service,Ingress,PersistentVolumeClaim,Node,HorizontalPodAutoscaler,CronJob,NetworkPolicy,PodDisruptionBudget --output json
+k8sgpt analyze --explain --namespace <ns> --output json --anonymize
+k8sgpt analyze --explain --filter Pod,Deployment,ReplicaSet,StatefulSet,Service,Ingress,PersistentVolumeClaim,Node,HorizontalPodAutoscaler,CronJob,NetworkPolicy,PodDisruptionBudget --output json --anonymize
 ```
 
 Recursos úteis: `--explain` (explicação em linguagem natural), `--with-doc` (trecho da documentação oficial), `--anonymize` (mascara dados sensíveis, use sempre), `--no-cache` (força reanálise), `--filter` (isola um analyzer), `--language pt-BR`.
@@ -131,8 +133,12 @@ O arquivo entregue deve conter **exatamente estes três tópicos**, nesta ordem,
 # RCA: <título curto do incidente>
 
 > Investigação somente leitura via K8sGPT. Nenhuma alteração foi aplicada ao cluster.
-> Coleta em <data-hora> | Confiança: <Alta/Média/Baixa>
+> Coleta em <AAAA-MM-DDThh:mmZ> | Confiança: <Alta/Média/Baixa>
+```
 
+Use sempre o formato ISO 8601 em UTC para a data-hora (ex.: `2026-02-11T16:45Z`) — não use outros formatos de data.
+
+```markdown
 ## 1. Causa-Raiz
 
 **Causa:** uma única frase afirmando o que causou o incidente. Direta, sem rodeio e sem preâmbulo.
@@ -146,7 +152,8 @@ configuração por trás do gatilho). Não transcreva os cinco porquês — só 
 
 Limite total do tópico: **8 linhas**. Marque com [suposição] o que for inferência e com [a verificar]
 o que ficou fora do alcance do K8sGPT. Se a confiança for Média ou Baixa, acrescente 1 linha
-dizendo o que falta para elevá-la.
+dizendo o que falta para elevá-la — **essa linha extra não conta no limite de 8**: nesse caso o teto
+passa a ser 9 linhas.
 
 ## 2. Resumo da Solução
 
@@ -190,6 +197,22 @@ Ações para o problema não voltar (ajuste de configuração, alerta, mudança 
 Específicas e verificáveis — nada de "melhorar o monitoramento".
 ```
 
+**Se a causa-raiz não foi determinada com os dados disponíveis**, o tópico 3 usa esta estrutura
+reduzida em vez das seis subseções acima — aqui o procedimento é de investigação, não de correção:
+
+```markdown
+### 3.1 Pré-requisitos
+Acessos, ferramentas ou pessoas necessárias para o administrador conduzir a investigação manual.
+
+### 3.2 Passos de investigação
+Lista numerada, em ordem, do que o administrador deve inspecionar manualmente (comandos de checagem,
+logs a revisar, métricas a puxar) para chegar a uma causa confirmada.
+
+### 3.3 Critério de conclusão
+O que precisa ser encontrado para reabrir este RCA com uma causa-raiz confirmada, e com que nível
+de confiança isso a colocaria.
+```
+
 ### Regras
 
 **Execução**
@@ -202,12 +225,12 @@ Específicas e verificáveis — nada de "melhorar o monitoramento".
 **Raciocínio**
 - Não deixe a primeira hipótese plausível encerrar a investigação: teste as concorrentes ou declare-as fora do alcance.
 - Um sintoma relatado que a coleta não confirma é divergência a reportar, não detalhe a ignorar.
-- É resultado legítimo entregar "causa-raiz não determinada com os dados disponíveis" — nesse caso, o tópico 3 vira um **procedimento de investigação** (o que o administrador deve inspecionar manualmente, em ordem) em vez de um procedimento de correção. Um documento confiante e errado é pior que um honesto e incompleto.
+- É resultado legítimo entregar "causa-raiz não determinada com os dados disponíveis" — nesse caso, use a estrutura reduzida de tópico 3 descrita acima (procedimento de investigação) em vez do procedimento de correção. Um documento confiante e errado é pior que um honesto e incompleto.
 
 **Escrita**
 - Tom *blameless*: descreva sistemas e processos, nunca pessoas.
 - Linguagem simples e direta; explique jargões na primeira ocorrência.
 - O documento tem três tópicos e só três. Nada de linha do tempo, impacto, lições aprendidas ou anexos — se a informação não couber em causa-raiz, resumo ou procedimento, ela não entra.
 - Densidade importa mais que extensão: o tópico 3 pode ser longo se o procedimento exigir, mas cada linha deve ser acionável.
-- O tópico 1 é o mais curto do documento e tem teto rígido de 8 linhas. Ele responde "o que causou", não "como investigamos": nada de narrar a investigação, listar hipóteses descartadas, transcrever saída do K8sGPT ou repetir o que já está no tópico 2. Se um detalhe é necessário para *agir*, ele pertence ao tópico 3; se é necessário para *decidir*, ao tópico 2.
+- O tópico 1 é o mais curto do documento e tem teto rígido de 8 linhas (9 se a confiança for Média ou Baixa, por causa da linha extra sobre o que falta). Ele responde "o que causou", não "como investigamos": nada de narrar a investigação, listar hipóteses descartadas, transcrever saída do K8sGPT ou repetir o que já está no tópico 2. Se um detalhe é necessário para *agir*, ele pertence ao tópico 3; se é necessário para *decidir*, ao tópico 2.
 - Responda em português do Brasil, no documento e na conversa.
