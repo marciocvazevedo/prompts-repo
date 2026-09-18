@@ -16,4 +16,4 @@ Pipelines de CI/CD, containers, orquestração, infraestrutura como código, obs
 
 ## Prompts
 
-- [diagnosticar-incidente-kubernetes-k8sgpt](./diagnosticar-incidente-kubernetes-k8sgpt/) — Investiga a causa-raiz de um incidente Kubernetes usando K8sGPT como única fonte de coleta (somente leitura), priorizando o MCP Server do K8sGPT e recorrendo ao binário via terminal apenas quando uma capacidade específica não estiver exposta pelo MCP. Entrega um RCA em três tópicos — causa-raiz, resumo da solução e procedimento técnico.
+- [diagnosticar-incidente-kubernetes-k8sgpt](./diagnosticar-incidente-kubernetes-k8sgpt/) — Investiga a causa-raiz de um incidente Kubernetes usando K8sGPT como única fonte de coleta (somente leitura), priorizando o MCP Server do K8sGPT e recorrendo ao binário via terminal apenas quando uma capacidade específica não estiver exposta pelo MCP. Só executa se houver evidência positiva de que o contexto ativo do kubeconfig está vinculado a um ClusterRole estritamente de leitura, sem nenhum verbo de escrita em nenhum recurso. Entrega um RCA em três tópicos — causa-raiz, resumo da solução e procedimento técnico.
